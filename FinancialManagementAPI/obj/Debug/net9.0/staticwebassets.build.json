@@ -1,0 +1,12 @@
+{
+  "Version": 1,
+  "Hash": "0cSTIVyelhlLEF/SYb9334gnGaJQmfZwT3fzpNKQQZA=",
+  "Source": "FinancialManagementAPI",
+  "BasePath": "_content/FinancialManagementAPI",
+  "Mode": "Default",
+  "ManifestType": "Build",
+  "ReferencedProjectsConfiguration": [],
+  "DiscoveryPatterns": [],
+  "Assets": [],
+  "Endpoints": []
+}

@@ -7,10 +7,8 @@ using Microsoft.EntityFrameworkCore;
 
 namespace FinancialManagementAPI.Database
 {
-    public class AppDbContext : DbContext
+    public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(options)
     {
-        public AppDbContext(DbContextOptions<AppDbContext> options) : base(options) { }
-
         public required DbSet<User> Users { get; set; }
         public required DbSet<Account> Accounts { get; set; }
         public required DbSet<Transaction> Transactions { get; set; }
