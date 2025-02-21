@@ -18,8 +18,12 @@ namespace FinancialManagementAPI.Controllers
         [HttpPost("register")]
         public async Task<IActionResult> Register([FromBody] RegisterUserDto dto)
         {
+            if (dto.Password == "")
+                return BadRequest("Senha não pode ser vazia");
+            
             if (_context.Users.Any(u => u.Email == dto.Email))
                 return BadRequest("Email já cadastrado");
+
 
             var user = new User
             {
