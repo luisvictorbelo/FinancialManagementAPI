@@ -4785,19 +4785,19 @@
     ]
   },
   "packageFolders": {
-    "C:\\Users\\luisb\\.nuget\\packages\\": {}
+    "C:\\Users\\luisvictor\\.nuget\\packages\\": {}
   },
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "C:\\Users\\luisb\\OneDrive\\Desktop\\projetos\\pessoal\\gestao-financeira\\FinancialManagementAPI\\FinancialManagementAPI\\FinancialManagementAPI.csproj",
+      "projectUniqueName": "C:\\Users\\luisvictor\\Desktop\\projetos\\c#\\FinancialManagementAPI\\FinancialManagementAPI\\FinancialManagementAPI\\FinancialManagementAPI.csproj",
       "projectName": "FinancialManagementAPI",
-      "projectPath": "C:\\Users\\luisb\\OneDrive\\Desktop\\projetos\\pessoal\\gestao-financeira\\FinancialManagementAPI\\FinancialManagementAPI\\FinancialManagementAPI.csproj",
-      "packagesPath": "C:\\Users\\luisb\\.nuget\\packages\\",
-      "outputPath": "C:\\Users\\luisb\\OneDrive\\Desktop\\projetos\\pessoal\\gestao-financeira\\FinancialManagementAPI\\FinancialManagementAPI\\obj\\",
+      "projectPath": "C:\\Users\\luisvictor\\Desktop\\projetos\\c#\\FinancialManagementAPI\\FinancialManagementAPI\\FinancialManagementAPI\\FinancialManagementAPI.csproj",
+      "packagesPath": "C:\\Users\\luisvictor\\.nuget\\packages\\",
+      "outputPath": "C:\\Users\\luisvictor\\Desktop\\projetos\\c#\\FinancialManagementAPI\\FinancialManagementAPI\\FinancialManagementAPI\\obj\\",
       "projectStyle": "PackageReference",
       "configFilePaths": [
-        "C:\\Users\\luisb\\AppData\\Roaming\\NuGet\\NuGet.Config"
+        "C:\\Users\\luisvictor\\AppData\\Roaming\\NuGet\\NuGet.Config"
       ],
       "originalTargetFrameworks": [
         "net9.0"

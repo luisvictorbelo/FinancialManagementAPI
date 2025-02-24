@@ -37,6 +37,5 @@ namespace FinancialManagementAPI.Controllers
 
             return Created("", new { user.Id, user.Name, user.Email });
         }
-
     }
 }
