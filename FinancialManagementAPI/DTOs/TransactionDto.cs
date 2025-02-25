@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 using FinancialManagementAPI.Enum;
 using FinancialManagementAPI.Models;
 
-namespace FinancialManagementAPI.DTO
+namespace FinancialManagementAPI.DTOs
 {
     public class TransactionDto
     {

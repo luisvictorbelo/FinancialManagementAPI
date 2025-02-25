@@ -1,5 +1,5 @@
 using FinancialManagementAPI.Database;
-using FinancialManagementAPI.DTO;
+using FinancialManagementAPI.DTOs;
 using FinancialManagementAPI.Models;
 using Microsoft.AspNetCore.Mvc;
 

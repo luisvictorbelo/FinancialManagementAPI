@@ -11,6 +11,6 @@ namespace FinancialManagementAPI.Models
         public required string Name { get; set; }
         public decimal Balance {get; set; }
         public int UserId { get; set; }
-        public required User User { get; set; }
+        public User? User { get; set; }
     }
 }

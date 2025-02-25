@@ -73,7 +73,7 @@
           }
         }
       },
-      "Microsoft.AspNetCore.Authentication.JwtBearer/9.0.1": {
+      "Microsoft.AspNetCore.Authentication.JwtBearer/9.0.2": {
         "type": "package",
         "dependencies": {
           "Microsoft.IdentityModel.Protocols.OpenIdConnect": "8.0.1"
@@ -1906,10 +1906,10 @@
         "logo.png"
       ]
     },
-    "Microsoft.AspNetCore.Authentication.JwtBearer/9.0.1": {
-      "sha512": "R/ZG9llsAOn/E8WOtg+PyLCB599lxzaIGy/NbwV1xG+smkyBF4w5/AJXNDq6tVw7/qbqvd+4xLAdWQiiVj1DXw==",
+    "Microsoft.AspNetCore.Authentication.JwtBearer/9.0.2": {
+      "sha512": "p3WhJqzvf6uuQiYpxARdC4Yr+UquZzzk7ZGun4MSufx3Mi9kmfjlU0e2MiBRHYWQdfx2HjU0ifaHJecJ7lXqug==",
       "type": "package",
-      "path": "microsoft.aspnetcore.authentication.jwtbearer/9.0.1",
+      "path": "microsoft.aspnetcore.authentication.jwtbearer/9.0.2",
       "files": [
         ".nupkg.metadata",
         ".signature.p7s",
@@ -1918,7 +1918,7 @@
         "THIRD-PARTY-NOTICES.TXT",
         "lib/net9.0/Microsoft.AspNetCore.Authentication.JwtBearer.dll",
         "lib/net9.0/Microsoft.AspNetCore.Authentication.JwtBearer.xml",
-        "microsoft.aspnetcore.authentication.jwtbearer.9.0.1.nupkg.sha512",
+        "microsoft.aspnetcore.authentication.jwtbearer.9.0.2.nupkg.sha512",
         "microsoft.aspnetcore.authentication.jwtbearer.nuspec"
       ]
     },
@@ -4774,7 +4774,7 @@
   "projectFileDependencyGroups": {
     "net9.0": [
       "BCrypt.Net-Next >= 4.0.3",
-      "Microsoft.AspNetCore.Authentication.JwtBearer >= 9.0.1",
+      "Microsoft.AspNetCore.Authentication.JwtBearer >= 9.0.2",
       "Microsoft.AspNetCore.OpenApi >= 9.0.0",
       "Microsoft.EntityFrameworkCore >= 8.0.13",
       "Microsoft.EntityFrameworkCore.Design >= 8.0.13",
@@ -4785,19 +4785,19 @@
     ]
   },
   "packageFolders": {
-    "C:\\Users\\luisvictor\\.nuget\\packages\\": {}
+    "C:\\Users\\luisb\\.nuget\\packages\\": {}
   },
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "C:\\Users\\luisvictor\\Desktop\\projetos\\c#\\FinancialManagementAPI\\FinancialManagementAPI\\FinancialManagementAPI\\FinancialManagementAPI.csproj",
+      "projectUniqueName": "C:\\Users\\luisb\\OneDrive\\Desktop\\projetos\\pessoal\\gestao-financeira\\FinancialManagementAPI\\FinancialManagementAPI\\FinancialManagementAPI.csproj",
       "projectName": "FinancialManagementAPI",
-      "projectPath": "C:\\Users\\luisvictor\\Desktop\\projetos\\c#\\FinancialManagementAPI\\FinancialManagementAPI\\FinancialManagementAPI\\FinancialManagementAPI.csproj",
-      "packagesPath": "C:\\Users\\luisvictor\\.nuget\\packages\\",
-      "outputPath": "C:\\Users\\luisvictor\\Desktop\\projetos\\c#\\FinancialManagementAPI\\FinancialManagementAPI\\FinancialManagementAPI\\obj\\",
+      "projectPath": "C:\\Users\\luisb\\OneDrive\\Desktop\\projetos\\pessoal\\gestao-financeira\\FinancialManagementAPI\\FinancialManagementAPI\\FinancialManagementAPI.csproj",
+      "packagesPath": "C:\\Users\\luisb\\.nuget\\packages\\",
+      "outputPath": "C:\\Users\\luisb\\OneDrive\\Desktop\\projetos\\pessoal\\gestao-financeira\\FinancialManagementAPI\\FinancialManagementAPI\\obj\\",
       "projectStyle": "PackageReference",
       "configFilePaths": [
-        "C:\\Users\\luisvictor\\AppData\\Roaming\\NuGet\\NuGet.Config"
+        "C:\\Users\\luisb\\AppData\\Roaming\\NuGet\\NuGet.Config"
       ],
       "originalTargetFrameworks": [
         "net9.0"
@@ -4833,7 +4833,7 @@
           },
           "Microsoft.AspNetCore.Authentication.JwtBearer": {
             "target": "Package",
-            "version": "[9.0.1, )"
+            "version": "[9.0.2, )"
           },
           "Microsoft.AspNetCore.OpenApi": {
             "target": "Package",

@@ -10,7 +10,7 @@ namespace FinancialManagementAPI.Models
     {
         public int Id { get; set; }
         public int AccountId { get; set; }
-        public required Account Account { get; set; }
+        public Account? Account { get; set; }
         public required TypeTransaction Type { get; set; } // "income" ou "expense" -> talvez mudar para um enum
         public decimal Amount { get; set; }
 
