@@ -39,7 +39,7 @@ builder.Services.AddSwaggerGen(c =>
     c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme()
     {
         Name = "Authorization",
-        Type = SecuritySchemeType.ApiKey,
+        Type = SecuritySchemeType.Http,
         Scheme = "Bearer",
         BearerFormat = "JWT",
         In = ParameterLocation.Header
@@ -67,14 +67,20 @@ if (string.IsNullOrEmpty(key)) throw new NullReferenceException(nameof(key));
 
 var encodedKey = Encoding.UTF8.GetBytes(key);
 
-builder.Services
-    .AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+builder.Services.AddAuthentication(options => {
+        options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+        options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+    })
     .AddJwtBearer(options =>
     {
+        options.RequireHttpsMetadata = false;
+        options.SaveToken = true;
         options.TokenValidationParameters = new TokenValidationParameters
         {
-            ValidateLifetime = true,
-            IssuerSigningKey = new SymmetricSecurityKey(encodedKey)
+            ValidateIssuerSigningKey = true,
+            IssuerSigningKey = new SymmetricSecurityKey(encodedKey),
+            ValidateIssuer = false,
+            ValidateAudience = false
         };
     });
 

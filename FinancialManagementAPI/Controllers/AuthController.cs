@@ -14,9 +14,9 @@ using Microsoft.IdentityModel.Tokens;
 
 namespace FinancialManagementAPI.Controllers
 {
-    [AllowAnonymous]
     [ApiController]
     [Route("api/auth")]
+    [AllowAnonymous]
     public class AuthController(AppDbContext context, IConfiguration configuration) : ControllerBase
     {
         private readonly AppDbContext _context = context;
@@ -50,7 +50,7 @@ namespace FinancialManagementAPI.Controllers
             var user = _context.Users.FirstOrDefault(u => u.Email == dto.Email);
 
             if (user == null || !BCrypt.Net.BCrypt.Verify(dto.Password, user.PasswordHash))
-                return Unauthorized("Credenciais inválidas.");
+                return BadRequest("Credenciais inválidas.");
             
             var token = GenerateJwtToken(user);
             return Ok(new { token });
@@ -72,7 +72,7 @@ namespace FinancialManagementAPI.Controllers
             
             var tokenDescriptor = new SecurityTokenDescriptor {
                 Subject = new ClaimsIdentity(claims),
-                Expires = DateTime.UtcNow.AddMinutes(60),
+                Expires = DateTime.UtcNow.AddHours(8),
                 SigningCredentials = credentials
             };
 

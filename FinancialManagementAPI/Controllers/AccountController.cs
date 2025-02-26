@@ -11,9 +11,9 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace FinancialManagementAPI.Controllers
 {
-    [Authorize]
     [ApiController]
     [Route("api/account")]
+    [Authorize]
     public class AccountController(AppDbContext context) : ControllerBase
     {
         private readonly AppDbContext _context = context;

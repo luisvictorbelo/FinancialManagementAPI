@@ -10,7 +10,6 @@ namespace FinancialManagementAPI.DTOs
     {
         public required string Name { get; set; }
         public decimal Balance {get; set; }
-        public int UserId { get; set; }
 
     }
 }
