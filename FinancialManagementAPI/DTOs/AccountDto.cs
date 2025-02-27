@@ -6,7 +6,7 @@ using FinancialManagementAPI.Models;
 
 namespace FinancialManagementAPI.DTOs
 {
-    public class AccountDto
+    public class AccountDto()
     {
         public required string Name { get; set; }
         public decimal Balance {get; set; }
