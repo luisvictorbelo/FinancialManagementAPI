@@ -28,17 +28,17 @@ namespace FinancialManagementAPI.Controllers
             if (!int.TryParse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value, out var userId))
                 return Unauthorized("Usuário não autenticado");
 
-            var account = new Account
+            var newAccount = new Account
             {
                 Name = dto.Name,
                 Balance = dto.Balance,
                 UserId = userId,
             };
 
-            _context.Accounts.Add(account);
+            _context.Accounts.Add(newAccount);
             await _context.SaveChangesAsync();
 
-            return Created("", new { account.Id, account.Name, account.Balance, account.UserId });
+            return Created("", new { newAccount.Id, newAccount.Name, newAccount.Balance, newAccount.UserId });
         }
 
         [HttpGet("get")]
@@ -49,7 +49,7 @@ namespace FinancialManagementAPI.Controllers
 
             var accounts = await _context.Accounts
                 .Where(x => x.UserId == userId)
-                .Select(x => new { x.Name, x.Balance })
+                .Select(x => new { x.Id, x.Name, x.Balance })
                 .ToListAsync();
 
             return Ok(accounts);

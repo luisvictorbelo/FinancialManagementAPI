@@ -23,34 +23,63 @@ namespace FinancialManagementAPI.Controllers
                 return Unauthorized("Usuário não autenticado");
 
             var account = await _context.Accounts.FindAsync(dto.AccountId);
-
             if (account == null) return NotFound("Conta não encontrada");
 
-            if (account.UserId != userId) return Forbid();
+            if (account.UserId != userId) return Forbid("Usuário não autorizado para acessar esta conta");
 
-            if (dto.Type == 0 && account.Balance > dto.Amount)
+            await using var transaction = await _context.Database.BeginTransactionAsync();
+            try
             {
+                bool isValid = ProcessTransaction(account, dto);
+                if (!isValid)
+                    return BadRequest("Saldo insuficiente");
+
+                _context.Accounts.Update(account);
+
+                var newTransaction = new Transaction
+                {
+                    AccountId = dto.AccountId,
+                    Type = dto.Type,
+                    Amount = dto.Amount,
+                    Category = dto.Category,
+                    Date = dto.Date
+                };
+
+                _context.Transactions.Add(newTransaction);
+                await _context.SaveChangesAsync();
+
+                await transaction.CommitAsync();
+
+                return CreatedAtAction(nameof(CreateTransaction), new
+                {
+                    newTransaction.Type,
+                    newTransaction.Amount,
+                    newTransaction.Category,
+                    newTransaction.Date
+                });
+            }
+            catch
+            {
+                await transaction.RollbackAsync();
+                return StatusCode(500, "Erro ao processar a transação");
+            }
+        }
+
+        private static bool ProcessTransaction(Account account, TransactionDto dto)
+        {
+            if (dto.Type == 0)
+            {
+                if (account.Balance < dto.Amount)
+                    return false;
+                
                 account.Balance -= dto.Amount;
-                // Criar método PUT AccountController
             }
             else
             {
                 account.Balance += dto.Amount;
-                // Criar método PUT AccountController
             }
 
-            var transaction = new Transaction
-            {
-                AccountId = dto.AccountId,
-                Type = dto.Type,
-                Amount = dto.Amount,
-                Category = dto.Category,
-                Date = dto.Date
-            };
-
-            _context.Transactions.Add(transaction);
-            await _context.SaveChangesAsync();
-            return Created("", new { transaction.Type, transaction.Amount, transaction.Category, transaction.Date });
+            return true;
         }
     }
 }

@@ -32,17 +32,17 @@ namespace FinancialManagementAPI.Controllers
                 return BadRequest("Email já cadastrado");
 
 
-            var user = new User
+            var newUser = new User
             {
                 Name = dto.Name,
                 Email = dto.Email,
                 PasswordHash = BCrypt.Net.BCrypt.HashPassword(dto.Password)
             };
 
-            _context.Users.Add(user);
+            _context.Users.Add(newUser);
             await _context.SaveChangesAsync();
 
-            return Created("", new { user.Id, user.Name, user.Email });
+            return Created("", new { newUser.Id, newUser.Name, newUser.Email });
         }
 
         [HttpPost("login")]
