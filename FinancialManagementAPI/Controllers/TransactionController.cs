@@ -1,9 +1,11 @@
 using System.Security.Claims;
 using FinancialManagementAPI.Database;
 using FinancialManagementAPI.DTOs;
+using FinancialManagementAPI.Enum;
 using FinancialManagementAPI.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 namespace FinancialManagementAPI.Controllers
 {
@@ -65,13 +67,55 @@ namespace FinancialManagementAPI.Controllers
             }
         }
 
+        [HttpGet("transactions")]
+        public async Task<ActionResult> GetUserTransaction(
+            [FromQuery] DateTime? startDate,
+            [FromQuery] DateTime? endDate,
+            [FromQuery] TypeTransaction? type,
+            [FromQuery] string? category)
+        {
+            if (!int.TryParse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value, out var userId))
+                return Unauthorized("Usuário não autenticado");
+
+            var query =  _context.Transactions
+                .Include(t => t.Account)
+                .Where(t => t.Account.UserId == userId)
+                .AsQueryable();
+
+            if (startDate.HasValue)
+                query = query.Where(t => t.Date >= startDate.Value);
+
+            if (endDate.HasValue)
+                query = query.Where(t => t.Date <= endDate.Value);
+
+            if (type.HasValue)
+                query = query.Where(t => t.Type == type.Value);
+
+            if (!string.IsNullOrEmpty(category))
+                query = query.Where(t => EF.Functions.Like(t.Category.ToLower(), $"%{category}"));
+
+            var transactions = await query
+                .Select(t => new
+                {
+                t.Id,
+                AccountName = t.Account.Name,
+                t.Type,
+                t.Amount,
+                t.Category,
+                t.Date
+                })
+                .ToListAsync();
+            
+            return Ok(transactions);
+        }
+
         private static bool ProcessTransaction(Account account, TransactionDto dto)
         {
             if (dto.Type == 0)
             {
                 if (account.Balance < dto.Amount)
                     return false;
-                
+
                 account.Balance -= dto.Amount;
             }
             else
