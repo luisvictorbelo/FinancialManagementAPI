@@ -6,11 +6,12 @@ using FinancialManagementAPI.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Identity.Client;
 
 namespace FinancialManagementAPI.Controllers
 {
     [ApiController]
-    [Route("api/transaction")]
+    [Route("transactions")]
     [Authorize]
     public class TransactionController(AppDbContext context) : ControllerBase
     {
@@ -67,13 +68,13 @@ namespace FinancialManagementAPI.Controllers
             }
         }
 
-        [HttpGet("transactions")]
-        public async Task<ActionResult> GetUserTransaction(
+        [HttpGet]
+        public async Task<ActionResult> GetUserTransactions(
             [FromQuery] DateTime? startDate,
             [FromQuery] DateTime? endDate,
             [FromQuery] TypeTransaction? type,
             [FromQuery] string? category)
-        {
+        {   
             if (!int.TryParse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value, out var userId))
                 return Unauthorized("Usuário não autenticado");
 
@@ -109,6 +110,31 @@ namespace FinancialManagementAPI.Controllers
             return Ok(transactions);
         }
 
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> Delete([FromRoute] int id, [FromBody] int accountId) {
+            
+            if (!int.TryParse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value, out var userId))
+                return Unauthorized("Usuário não autenticado");
+
+            
+            var account = await _context.Accounts.FirstOrDefaultAsync(account => account.UserId == userId && account.Id == accountId);
+
+            if (account == null)
+                return NotFound();
+
+            var transaction = await _context.Transactions.FirstOrDefaultAsync(transaction => transaction.AccountId == account.Id);
+            
+            if (transaction == null)
+                return NotFound();
+            
+            _context.Transactions.Remove(transaction);
+
+            await _context.SaveChangesAsync();
+
+            return NoContent();
+        }
+
+
         private static bool ProcessTransaction(Account account, TransactionDto dto)
         {
             if (dto.Type == 0)
@@ -122,7 +148,6 @@ namespace FinancialManagementAPI.Controllers
             {
                 account.Balance += dto.Amount;
             }
-
             return true;
         }
     }

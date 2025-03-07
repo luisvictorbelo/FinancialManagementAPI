@@ -14,7 +14,7 @@ using Microsoft.EntityFrameworkCore;
 namespace FinancialManagementAPI.Controllers
 {
     [ApiController]
-    [Route("api/account")]
+    [Route("accounts")]
     [Authorize]
     public class AccountController(AppDbContext context) : ControllerBase
     {
@@ -41,8 +41,8 @@ namespace FinancialManagementAPI.Controllers
             return Created("", new { newAccount.Id, newAccount.Name, newAccount.Balance, newAccount.UserId });
         }
 
-        [HttpGet("accounts")]
-        public async Task<IActionResult> GetAccounts()
+        [HttpGet()]
+        public async Task<IActionResult> GetUserAccounts()
         {
             if (!int.TryParse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value, out var userId))
                 return Unauthorized("Usuário não autenticado");
@@ -54,18 +54,5 @@ namespace FinancialManagementAPI.Controllers
 
             return Ok(accounts);
         }
-
-        // public async Task<IActionResult> GetAccountById()
-        // {
-        //     if (!int.TryParse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value, out var userId))
-        //         return Unauthorized("Usuário não autenticado");
-
-        //     var accounts = await _context.Accounts
-        //         .Where(x => x.UserId == userId)
-        //         .Select(x => new { x.Id, x.Name, x.Balance })
-        //         .ToListAsync();
-
-        //     return Ok(accounts);
-        // }
     }
 }

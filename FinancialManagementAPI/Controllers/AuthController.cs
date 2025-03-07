@@ -15,7 +15,7 @@ using Microsoft.IdentityModel.Tokens;
 namespace FinancialManagementAPI.Controllers
 {
     [ApiController]
-    [Route("api/auth")]
+    [Route("auth")]
     [AllowAnonymous]
     public class AuthController(AppDbContext context, IConfiguration configuration) : ControllerBase
     {
