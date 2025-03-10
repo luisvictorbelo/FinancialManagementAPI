@@ -68,65 +68,25 @@ namespace FinancialManagementAPI.Controllers
             }
         }
 
-        [HttpGet]
-        public async Task<ActionResult> GetUserTransactions(
-            [FromQuery] DateTime? startDate,
-            [FromQuery] DateTime? endDate,
-            [FromQuery] TypeTransaction? type,
-            [FromQuery] string? category)
-        {   
-            if (!int.TryParse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value, out var userId))
-                return Unauthorized("Usuário não autenticado");
-
-            var query =  _context.Transactions
-                .Include(t => t.Account)
-                .Where(t => t.Account.UserId == userId)
-                .AsQueryable();
-
-            if (startDate.HasValue)
-                query = query.Where(t => t.Date >= startDate.Value);
-
-            if (endDate.HasValue)
-                query = query.Where(t => t.Date <= endDate.Value);
-
-            if (type.HasValue)
-                query = query.Where(t => t.Type == type.Value);
-
-            if (!string.IsNullOrEmpty(category))
-                query = query.Where(t => EF.Functions.Like(t.Category.ToLower(), $"%{category}"));
-
-            var transactions = await query
-                .Select(t => new
-                {
-                t.Id,
-                AccountName = t.Account.Name,
-                t.Type,
-                t.Amount,
-                t.Category,
-                t.Date
-                })
-                .ToListAsync();
-            
-            return Ok(transactions);
-        }
+        
 
         [HttpDelete("{id}")]
-        public async Task<IActionResult> Delete([FromRoute] int id, [FromBody] int accountId) {
+        public async Task<IActionResult> DeleteTransaction([FromRoute] int id) {
             
             if (!int.TryParse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value, out var userId))
-                return Unauthorized("Usuário não autenticado");
+                return Unauthorized("Usuário não autenticado.");
 
             
-            var account = await _context.Accounts.FirstOrDefaultAsync(account => account.UserId == userId && account.Id == accountId);
+            var transaction = await _context.Transactions
+                .Include(t => t.Account)
+                .FirstOrDefaultAsync(t => t.Id == id);
 
-            if (account == null)
-                return NotFound();
-
-            var transaction = await _context.Transactions.FirstOrDefaultAsync(transaction => transaction.AccountId == account.Id);
-            
             if (transaction == null)
-                return NotFound();
+                return NotFound("Transação não encontrada.");
             
+            if(transaction.Account?.UserId != userId)
+                return Forbid("Você não tem permissão para deletar esta transação.");
+
             _context.Transactions.Remove(transaction);
 
             await _context.SaveChangesAsync();
