@@ -33,7 +33,7 @@ namespace FinancialManagementAPI.Controllers
             await using var transaction = await _context.Database.BeginTransactionAsync();
             try
             {
-                bool isValid = ProcessTransaction(account, dto);
+                bool isValid = ProcessTransactionOnCreate(account, dto);
                 if (!isValid)
                     return BadRequest("Saldo insuficiente");
 
@@ -68,24 +68,35 @@ namespace FinancialManagementAPI.Controllers
             }
         }
 
-        
+
 
         [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteTransaction([FromRoute] int id) {
-            
+        public async Task<IActionResult> DeleteTransaction([FromRoute] int id)
+        {
+
             if (!int.TryParse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value, out var userId))
                 return Unauthorized("Usuário não autenticado.");
 
-            
+
             var transaction = await _context.Transactions
                 .Include(t => t.Account)
                 .FirstOrDefaultAsync(t => t.Id == id);
 
             if (transaction == null)
                 return NotFound("Transação não encontrada.");
-            
-            if(transaction.Account?.UserId != userId)
+
+            if (transaction.Account?.UserId != userId)
                 return Forbid("Você não tem permissão para deletar esta transação.");
+
+            var account = await _context.Accounts.FindAsync(transaction.AccountId);
+            if (account == null) return NotFound("Conta não encontrada");
+
+
+            bool isValid = ProcessTransactionOnDelete(account, transaction);
+            if (!isValid)
+                return BadRequest("Houve um erro na sua operação.");
+
+            _context.Accounts.Update(account);
 
             _context.Transactions.Remove(transaction);
 
@@ -95,20 +106,34 @@ namespace FinancialManagementAPI.Controllers
         }
 
 
-        private static bool ProcessTransaction(Account account, TransactionDto dto)
+        private static bool ProcessTransactionOnCreate(Account account, TransactionDto dto)
         {
-            if (dto.Type == 0)
+            if (dto.Type == TypeTransaction.Expense)
             {
-                if (account.Balance < dto.Amount)
-                    return false;
-
                 account.Balance -= dto.Amount;
+                return true;
             }
-            else
+            else if (dto.Type == TypeTransaction.Income)
             {
                 account.Balance += dto.Amount;
+                return true;
             }
-            return true;
+            return false;
+        }
+
+        private static bool ProcessTransactionOnDelete(Account account, Transaction transaction)
+        {
+            if (transaction.Type == TypeTransaction.Expense)
+            {
+                account.Balance += transaction.Amount;
+                return true;
+            }
+            else if (transaction.Type == TypeTransaction.Income)
+            {
+                account.Balance -= transaction.Amount;
+                return true;
+            }
+            return false;
         }
     }
 }
