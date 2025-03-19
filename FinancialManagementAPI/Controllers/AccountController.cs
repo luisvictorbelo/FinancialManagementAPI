@@ -103,5 +103,28 @@ namespace FinancialManagementAPI.Controllers
             
             return Ok(transactions);
         }
+
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> DeleteAccount([FromRoute] int id)
+        {
+
+            if (!int.TryParse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value, out var userId))
+                return Unauthorized("Usuário não autenticado.");
+
+
+            var account = await _context.Accounts.FindAsync(id);
+
+            if (account == null)
+                return NotFound("Conta não encontrada.");
+
+            if (account.UserId != userId)
+                return Forbid("Você não tem permissão para deletar esta conta.");
+
+            _context.Accounts.Remove(account);
+
+            await _context.SaveChangesAsync();
+
+            return NoContent();
+        }
     }
 }
