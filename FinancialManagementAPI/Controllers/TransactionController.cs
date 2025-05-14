@@ -2,6 +2,7 @@ using System.Security.Claims;
 using FinancialManagementAPI.Database;
 using FinancialManagementAPI.DTOs;
 using FinancialManagementAPI.Enum;
+using FinancialManagementAPI.Extensions;
 using FinancialManagementAPI.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -22,8 +23,8 @@ namespace FinancialManagementAPI.Controllers
         public async Task<IActionResult> CreateTransaction([FromBody] TransactionDto dto)
         {
 
-            if (!int.TryParse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value, out var userId))
-                return Unauthorized("Usuário não autenticado");
+            var userId = User.GetUserId();
+            if (userId == null) return Unauthorized("Usuário não autenticado.");
 
             var account = await _context.Accounts.FindAsync(dto.AccountId);
             if (account == null) return NotFound("Conta não encontrada");
@@ -65,9 +66,9 @@ namespace FinancialManagementAPI.Controllers
             [FromQuery] TypeTransaction? type,
             [FromQuery] string? category)
         {
-            if (!int.TryParse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value, out var userId))
-                return Unauthorized("Usuário não autenticado.");
-            
+            var userId = User.GetUserId();
+            if (userId == null) return Unauthorized("Usuário não autenticado.");
+
             var account = await _context.Accounts.FindAsync(accountId);
 
             if (account == null)
@@ -75,10 +76,10 @@ namespace FinancialManagementAPI.Controllers
 
             if (account.UserId != userId)
                 return Forbid("Você não tem permissão para acessar as transações desta conta.");
-            
-             var query = _context.Transactions
-                .Where(t => t.AccountId == accountId)
-                .AsQueryable();
+
+            var query = _context.Transactions
+               .Where(t => t.AccountId == accountId)
+               .AsQueryable();
 
             if (startDate.HasValue)
                 query = query.Where(t => t.Date >= startDate.Value);
@@ -105,14 +106,42 @@ namespace FinancialManagementAPI.Controllers
             return Ok(transactions);
         }
 
+        [HttpGet("{id}")]
+        public async Task<IActionResult> GetTransactionById([FromRoute] int id)
+        {
+            var userId = User.GetUserId();
+            if (userId == null) return Unauthorized("Usuário não autenticado.");
+
+            var transaction = await _context.Transactions
+            .AsNoTracking()
+            .Include(t => t.Account)
+            .FirstOrDefaultAsync(t => t.Id == id);
+
+            if (transaction == null)
+            return NotFound("Transação não encontrada.");
+
+            if (transaction.Account?.UserId != userId)
+            return Forbid("Você não tem permissão para acessar esta transação.");
+
+            return Ok(new
+            {
+            transaction.Id,
+            transaction.AccountId,
+            transaction.Type,
+            transaction.Amount,
+            transaction.Category,
+            transaction.Date
+            });
+        }
+
 
 
         [HttpDelete("delete/{id}")]
-        public async Task<IActionResult> DeleteTransaction([FromRoute] int id)
+        public async Task<IActionResult> DeleteTransactionById([FromRoute] int id)
         {
 
-            if (!int.TryParse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value, out var userId))
-                return Unauthorized("Usuário não autenticado.");
+            var userId = User.GetUserId();
+            if (userId == null) return Unauthorized("Usuário não autenticado.");
 
 
             var transaction = await _context.Transactions
@@ -145,8 +174,8 @@ namespace FinancialManagementAPI.Controllers
         [HttpPost("update/{id}")]
         public async Task<IActionResult> UpdateTransaction([FromRoute] int id, [FromBody] TransactionDto dto)
         {
-            if (!int.TryParse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value, out var userId))
-                return Unauthorized("Usuário não autenticado.");
+            var userId = User.GetUserId();
+            if (userId == null) return Unauthorized("Usuário não autenticado.");
 
 
             var transaction = await _context.Transactions

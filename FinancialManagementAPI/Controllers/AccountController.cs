@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using FinancialManagementAPI.Database;
 using FinancialManagementAPI.DTOs;
 using FinancialManagementAPI.Enum;
+using FinancialManagementAPI.Extensions;
 using FinancialManagementAPI.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Authorization.Infrastructure;
@@ -26,14 +27,14 @@ namespace FinancialManagementAPI.Controllers
         public async Task<IActionResult> CreateAccount([FromBody] AccountDto dto)
         {
 
-            if (!int.TryParse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value, out var userId))
-                return Unauthorized("Usuário não autenticado");
+            var userId = User.GetUserId();
+            if (userId == null) return Unauthorized("Usuário não autenticado.");
 
             var newAccount = new Account
             {
                 Name = dto.Name,
                 Balance = dto.Balance,
-                UserId = userId,
+                UserId = (int)userId,
             };
 
             _context.Accounts.Add(newAccount);
@@ -60,8 +61,8 @@ namespace FinancialManagementAPI.Controllers
         public async Task<IActionResult> DeleteAccount([FromRoute] int id)
         {
 
-            if (!int.TryParse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value, out var userId))
-                return Unauthorized("Usuário não autenticado.");
+            var userId = User.GetUserId();
+            if (userId == null) return Unauthorized("Usuário não autenticado.");
 
 
             var account = await _context.Accounts.FindAsync(id);
