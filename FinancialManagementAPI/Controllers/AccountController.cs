@@ -56,54 +56,6 @@ namespace FinancialManagementAPI.Controllers
             return Ok(accounts);
         }
 
-        [HttpGet("{accountId}/transactions")]
-        public async Task<ActionResult> GetAccountTransactions(
-            [FromRoute] int accountId,
-            [FromQuery] DateTime? startDate,
-            [FromQuery] DateTime? endDate,
-            [FromQuery] TypeTransaction? type,
-            [FromQuery] string? category)
-        {   
-            if (!int.TryParse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value, out var userId))
-                return Unauthorized("Usuário não autenticado.");
-
-            var account = await _context.Accounts.FindAsync(accountId);
-            if (account == null)
-                return NotFound("Conta não encontrada.");
-            
-            if (account.UserId != userId)
-                return Forbid("Você não tem permissão para acessar as transações desta conta.");
-
-            var query =  _context.Transactions
-                .Where(t => t.AccountId == accountId)
-                .AsQueryable();
-
-            if (startDate.HasValue)
-                query = query.Where(t => t.Date >= startDate.Value);
-
-            if (endDate.HasValue)
-                query = query.Where(t => t.Date <= endDate.Value);
-
-            if (type.HasValue)
-                query = query.Where(t => t.Type == type.Value);
-
-            if (!string.IsNullOrEmpty(category))
-                query = query.Where(t => EF.Functions.Like(t.Category.ToLower(), $"%{category}"));
-
-            var transactions = await query
-                .Select(t => new
-                {
-                t.Id,
-                t.Type,
-                t.Amount,
-                t.Category,
-                t.Date
-                })
-                .ToListAsync();
-            
-            return Ok(transactions);
-        }
-
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteAccount([FromRoute] int id)
         {

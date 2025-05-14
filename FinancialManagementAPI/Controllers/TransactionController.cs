@@ -11,7 +11,7 @@ using Microsoft.Identity.Client;
 namespace FinancialManagementAPI.Controllers
 {
     [ApiController]
-    [Route("transactions")]
+    [Route("transaction")]
     [Authorize]
     public class TransactionController(AppDbContext context) : ControllerBase
     {
@@ -30,47 +30,84 @@ namespace FinancialManagementAPI.Controllers
 
             if (account.UserId != userId) return Forbid("Usuário não autorizado para acessar esta conta");
 
-            await using var transaction = await _context.Database.BeginTransactionAsync();
-            try
+            bool isValid = ProcessTransactionOnCreate(account, dto);
+            if (!isValid)
+                return BadRequest("Erro! Tente novamente.");
+
+            _context.Accounts.Update(account);
+
+            var newTransaction = new Transaction
             {
-                bool isValid = ProcessTransactionOnCreate(account, dto);
-                if (!isValid)
-                    return BadRequest("Saldo insuficiente");
+                AccountId = dto.AccountId,
+                Type = dto.Type,
+                Amount = dto.Amount,
+                Category = dto.Category,
+                Date = dto.Date
+            };
 
-                _context.Accounts.Update(account);
+            _context.Transactions.Add(newTransaction);
+            await _context.SaveChangesAsync();
 
-                var newTransaction = new Transaction
-                {
-                    AccountId = dto.AccountId,
-                    Type = dto.Type,
-                    Amount = dto.Amount,
-                    Category = dto.Category,
-                    Date = dto.Date
-                };
-
-                _context.Transactions.Add(newTransaction);
-                await _context.SaveChangesAsync();
-
-                await transaction.CommitAsync();
-
-                return CreatedAtAction(nameof(CreateTransaction), new
-                {
-                    newTransaction.Type,
-                    newTransaction.Amount,
-                    newTransaction.Category,
-                    newTransaction.Date
-                });
-            }
-            catch
+            return CreatedAtAction(nameof(CreateTransaction), new
             {
-                await transaction.RollbackAsync();
-                return StatusCode(500, "Erro ao processar a transação");
-            }
+                newTransaction.Type,
+                newTransaction.Amount,
+                newTransaction.Category,
+                newTransaction.Date
+            });
+        }
+
+        [HttpGet("{accountId}/transactions")]
+        public async Task<IActionResult> GetTransactions(
+            [FromRoute] int accountId,
+            [FromQuery] DateTime? startDate,
+            [FromQuery] DateTime? endDate,
+            [FromQuery] TypeTransaction? type,
+            [FromQuery] string? category)
+        {
+            if (!int.TryParse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value, out var userId))
+                return Unauthorized("Usuário não autenticado.");
+            
+            var account = await _context.Accounts.FindAsync(accountId);
+
+            if (account == null)
+                return NotFound("Conta não encontrada.");
+
+            if (account.UserId != userId)
+                return Forbid("Você não tem permissão para acessar as transações desta conta.");
+            
+             var query = _context.Transactions
+                .Where(t => t.AccountId == accountId)
+                .AsQueryable();
+
+            if (startDate.HasValue)
+                query = query.Where(t => t.Date >= startDate.Value);
+
+            if (endDate.HasValue)
+                query = query.Where(t => t.Date <= endDate.Value);
+
+            if (type.HasValue)
+                query = query.Where(t => t.Type == type.Value);
+
+            if (!string.IsNullOrEmpty(category))
+                query = query.Where(t => EF.Functions.Like(t.Category.ToLower(), $"%{category}"));
+
+            var transactions = await query
+                .Select(t => new
+                {
+                    t.Id,
+                    t.Type,
+                    t.Amount,
+                    t.Category,
+                    t.Date
+                }).ToListAsync();
+
+            return Ok(transactions);
         }
 
 
 
-        [HttpDelete("{id}")]
+        [HttpDelete("delete/{id}")]
         public async Task<IActionResult> DeleteTransaction([FromRoute] int id)
         {
 
@@ -103,6 +140,50 @@ namespace FinancialManagementAPI.Controllers
             await _context.SaveChangesAsync();
 
             return NoContent();
+        }
+
+        [HttpPost("update/{id}")]
+        public async Task<IActionResult> UpdateTransaction([FromRoute] int id, [FromBody] TransactionDto dto)
+        {
+            if (!int.TryParse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value, out var userId))
+                return Unauthorized("Usuário não autenticado.");
+
+
+            var transaction = await _context.Transactions
+                .Include(t => t.Account)
+                .FirstOrDefaultAsync(t => t.Id == id);
+
+            if (transaction == null)
+                return NotFound("Transação não encontrada.");
+
+            if (transaction.Account?.UserId != userId)
+                return Forbid("Você não tem permissão para atualizar esta transação.");
+
+            var newTransaction = new Transaction
+            {
+                AccountId = dto.AccountId,
+                Type = dto.Type,
+                Amount = dto.Amount,
+                Category = dto.Category,
+                Date = dto.Date
+            };
+
+            transaction.AccountId = newTransaction.AccountId;
+            transaction.Type = newTransaction.Type;
+            transaction.Amount = newTransaction.Amount;
+            transaction.Category = newTransaction.Category;
+            transaction.Date = newTransaction.Date;
+
+            _context.Transactions.Update(transaction);
+            await _context.SaveChangesAsync();
+
+            return Ok(new
+            {
+                transaction.Type,
+                transaction.Amount,
+                transaction.Category,
+                transaction.Date
+            });
         }
 
 
